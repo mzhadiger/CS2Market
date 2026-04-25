@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}CS2 Marketplace — Trade, rent, and discover skins{% endblock %}
+
+{% block content %}
+
+<!-- ==================== HERO ==================== -->
+{% if featured %}
+<section class="hero observe-fade">
+  <div class="hero-inner">
+    <!-- Left: copy -->
+    <div class="hero-text">
+      <span class="eyebrow">
+        <i class="bi bi-star-fill"></i> Featured Skin
+      </span>
+      <h1>Trade Counter-Strike skins, <br class="d-none d-md-inline">your way.</h1>
+      <p class="lede">
+        Buy outright or rent skins by the day — then return them automatically.
+        Real catalog, real prices, simulated wallet.
+      </p>
+      <div class="hero-actions">
+        <a href="{{ url_for('search') }}" class="btn btn-cs2">
+          <i class="bi bi-grid-3x3-gap"></i> Browse Marketplace
+        </a>
+        {% if not current_user.is_authenticated %}
+          <a href="{{ url_for('auth.register') }}" class="btn btn-cs2-outline">
+            Create Account
+          </a>
+        {% else %}
+          <a href="{{ url_for('my_inventory') }}" class="btn btn-cs2-outline">
+            <i class="bi bi-backpack"></i> My Inventory
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: featured skin image card -->
+    <a href="{{ url_for('skin_detail', skin_id=featured.skin_id) }}"
+       class="hero-image text-decoration-none">
+      {% if featured.image_url %}
+        <img src="{{ featured.image_url }}" alt="{{ featured.skin_name }}">
+      {% else %}
+        <i class="bi bi-image" style="font-size: 5rem; color: var(--text-3);"></i>
+      {% endif %}
+      <div class="hero-featured-meta">
+        <span class="rarity-pill" data-rarity="{{ featured.rarity }}">
+          {{ featured.rarity }}
+        </span>
+        <span class="chip" style="background: var(--bg-elev-1);">
+          {{ featured.weapon_name }} | {{ featured.skin_name }}
+          <span style="color: var(--accent); font-weight: 700;">
+            ${{ '%.2f' % featured.base_price }}
+          </span>
+        </span>
+      </div>
+    </a>
+  </div>
+</section>
+{% endif %}
+
+<!-- ==================== STATS STRIP ==================== -->
+{% if stats %}
+<section class="stat-strip observe-fade delay-1">
+  <div class="stat-card">
+    <span class="stat-icon"><i class="bi bi-tag-fill"></i></span>
+    <span class="stat-label">Active Listings</span>
+    <span class="stat-value" data-count-to="{{ stats.active_listings }}">
+      {{ stats.active_listings }}
+    </span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-icon"><i class="bi bi-clock-history"></i></span>
+    <span class="stat-label">Active Rentals</span>
+    <span class="stat-value" data-count-to="{{ stats.active_rentals }}">
+      {{ stats.active_rentals }}
+    </span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-icon"><i class="bi bi-graph-up"></i></span>
+    <span class="stat-label">Sales (30d)</span>
+    <span class="stat-value" data-count-to="{{ (stats.sales_volume_30d or 0)|int }}" data-prefix="$">
+      ${{ '{:,.0f}'.format(stats.sales_volume_30d or 0) }}
+    </span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-icon"><i class="bi bi-people-fill"></i></span>
+    <span class="stat-label">Traders</span>
+    <span class="stat-value" data-count-to="{{ stats.total_users }}">
+      {{ stats.total_users }}
+    </span>
+  </div>
+</section>
+{% endif %}
+
+<!-- ==================== BROWSE BY RARITY ==================== -->
+{% if rarity_counts %}
+<section class="observe-fade delay-2 mb-5">
+  <div class="section-head">
+    <h2>Browse by Rarity</h2>
+    <span class="section-meta">
+      <i class="bi bi-info-circle"></i> Filtered instantly — click any tier
+    </span>
+  </div>
+  <div class="rarity-browser">
+    {% for r in rarity_counts %}
+      <a href="{{ url_for('search', rarity=r.rarity) }}"
+         class="rarity-chip text-decoration-none"
+         data-rarity="{{ r.rarity }}">
+        <div class="rarity-name">{{ r.rarity }}</div>
+        <div class="rarity-count">{{ r.count }} skin{{ r.count != 1 and 's' or '' }}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ==================== TRENDING ==================== -->
+{% if trending %}
+<section class="observe-fade mb-5">
+  <div class="section-head">
+    <h2><i class="bi bi-fire" style="color: var(--accent);"></i> Trending This Week</h2>
+    <span class="section-meta">Top {{ trending|length }} skins by listing activity</span>
+  </div>
+  <div class="row">
+    {% for t in trending %}
+      <div class="col-md-6 col-lg-3 mb-4">
+        <a href="{{ url_for('skin_detail', skin_id=t.skin_id) }}"
+           class="text-decoration-none d-block h-100">
+          <div class="cs2-card h-100" data-rarity="{{ t.rarity }}">
+            <div class="card-img-wrap">
+              {% if t.image_url %}
+                <img src="{{ t.image_url }}" alt="{{ t.skin_name }}" loading="lazy">
+              {% endif %}
+              <div style="position: absolute; top: 10px; right: 10px; z-index: 2;">
+                <span class="chip" style="background: var(--bg-elev-1); font-size: 0.72rem;">
+                  <i class="bi bi-graph-up"></i> {{ t.listing_count }} live
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="weapon-line">{{ t.weapon_name }}</div>
+              <div class="skin-name">{{ t.skin_name }}</div>
+              <span class="rarity-pill mt-2" data-rarity="{{ t.rarity }}">{{ t.rarity }}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ==================== LATEST LISTINGS ==================== -->
+<section class="observe-fade">
+  <div class="section-head">
+    <h2>Latest Listings</h2>
+    <a href="{{ url_for('search') }}" class="btn-ghost">
+      Browse all <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  <div class="row">
+    {% for l in listings %}
+      {{ m.skin_card(l, delay=(loop.index0 % 3) + 1) }}
+    {% else %}
+      <div class="col-12">
+        {{ m.empty_state(
+            'bi-inbox',
+            'No listings yet',
+            'Be the first to list a skin on the marketplace.',
+            'Get Started',
+            url_for('auth.register') if not current_user.is_authenticated else url_for('my_inventory')
+        ) }}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
