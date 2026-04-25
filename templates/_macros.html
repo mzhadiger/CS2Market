@@ -1,0 +1,117 @@
+{# ===============================================================
+   _macros.html — Reusable building blocks
+   =============================================================== #}
+
+{# -- skin_card: main listing tile used on Home, Browse, Skin Detail -- #}
+{% macro skin_card(l, delay=0) %}
+  <div class="col-md-6 col-lg-4 col-xl-3 mb-4 observe-fade {% if delay %}delay-{{ delay }}{% endif %}">
+    <a href="{{ url_for('listing_detail', listing_id=l.listing_id) }}"
+       class="text-decoration-none d-block h-100">
+      <div class="cs2-card" data-rarity="{{ l.rarity }}">
+        <div class="card-img-wrap">
+          {% if l.image_url %}
+            <img src="{{ l.image_url }}" alt="{{ l.skin_name }}" loading="lazy">
+          {% else %}
+            <i class="bi bi-image" style="font-size:2.5rem;color:var(--text-3);"></i>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <div class="card-row">
+            <span class="rarity-pill" data-rarity="{{ l.rarity }}">{{ l.rarity }}</span>
+            {% if l.is_stattrak %}<span class="stattrak-badge">ST™</span>{% endif %}
+          </div>
+          <div class="weapon-line">{{ l.weapon_name }}</div>
+          <div class="skin-name">{{ l.skin_name }}</div>
+          <div class="wear-line">
+            <i class="bi bi-droplet-half" style="font-size: 0.72rem;"></i>
+            {{ l.wear_category }}
+          </div>
+          <div class="mt-3 d-flex justify-content-between align-items-center">
+            {% if l.listing_type == 'sale' %}
+              <span class="price">${{ '%.2f' % l.sale_price }}</span>
+              <i class="bi bi-tag-fill" style="color: var(--text-3); font-size: 0.85rem;"></i>
+            {% else %}
+              <span class="price price-rent">${{ '%.2f' % l.daily_rental_rate }}</span>
+              <i class="bi bi-clock-history" style="color: var(--good); font-size: 0.85rem;"></i>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+{% endmacro %}
+
+
+{# -- skin_card_skeleton: placeholder while loading -- #}
+{% macro skin_card_skeleton() %}
+  <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-image"></div>
+      <div class="skeleton-body">
+        <div class="skeleton skeleton-text" style="width: 30%;"></div>
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text" style="width: 40%; margin-top: 14px;"></div>
+        <div class="skeleton skeleton-text" style="width: 60%; height: 16px;"></div>
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+
+
+{# -- active_filter_chips: shows selected filters with × remove links -- #}
+{% macro active_filter_chips(args) %}
+  {% set chips = [] %}
+  {% if args.q           %}{% set _ = chips.append(('q',            'Search: "' ~ args.q ~ '"')) %}{% endif %}
+  {% if args.rarity      %}{% set _ = chips.append(('rarity',       args.rarity)) %}{% endif %}
+  {% if args.weapon_type %}{% set _ = chips.append(('weapon_type',  args.weapon_type|capitalize)) %}{% endif %}
+  {% if args.listing_type%}{% set _ = chips.append(('listing_type', args.listing_type|capitalize)) %}{% endif %}
+  {% if args.min_price   %}{% set _ = chips.append(('min_price',    'Min $' ~ args.min_price)) %}{% endif %}
+  {% if args.max_price   %}{% set _ = chips.append(('max_price',    'Max $' ~ args.max_price)) %}{% endif %}
+  {% if chips %}
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      {% for key, label in chips %}
+        {# Build URL that preserves all OTHER filters but strips this one. #}
+        {% set new_args = {} %}
+        {% for k, v in args.items() %}
+          {% if k != key %}{% set _ = new_args.update({k: v}) %}{% endif %}
+        {% endfor %}
+        <a href="{{ url_for('search', **new_args) }}" class="chip text-decoration-none">
+          {{ label }}
+          <i class="bi bi-x-circle-fill chip-x"></i>
+        </a>
+      {% endfor %}
+      <a href="{{ url_for('search') }}" class="chip text-decoration-none"
+         style="color: var(--bad); border-color: var(--bad);">
+        Clear all
+      </a>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+
+{# -- empty_state: reusable "nothing here" block -- #}
+{% macro empty_state(icon, title, body, action_label=None, action_href=None) %}
+  <div class="empty-state">
+    <i class="bi {{ icon }} empty-icon"></i>
+    <h3>{{ title }}</h3>
+    <p class="mb-0" style="max-width: 44ch; margin-inline: auto;">{{ body }}</p>
+    {% if action_label and action_href %}
+      <a href="{{ action_href }}" class="btn btn-cs2 mt-3">{{ action_label }}</a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+
+{# -- breadcrumb: accessible trail nav -- #}
+{% macro breadcrumb(items) %}
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    {% for item in items %}
+      {% if loop.last %}
+        <span class="current" aria-current="page">{{ item.label }}</span>
+      {% else %}
+        <a href="{{ item.href }}">{{ item.label }}</a>
+        <i class="bi bi-chevron-right sep" style="font-size: 0.7rem;"></i>
+      {% endif %}
+    {% endfor %}
+  </nav>
+{% endmacro %}
