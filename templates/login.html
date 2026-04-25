@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Sign In — CS2 Marketplace{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <!-- Left: form -->
+  <div class="auth-form-side">
+    <div style="max-width: 380px; width: 100%; margin: 0 auto;">
+      <div style="margin-bottom: var(--s-5);">
+        <span class="eyebrow" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--accent-soft); color: var(--accent); border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: var(--s-3);">
+          <i class="bi bi-person-circle"></i> Welcome Back
+        </span>
+        <h1>Sign in to your account</h1>
+        <p style="color: var(--text-2); font-size: 0.95rem;">
+          Access your inventory, track rentals, and trade skins.
+        </p>
+      </div>
+
+      <form method="post" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" required autofocus
+                 placeholder="your username">
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <div class="password-wrap" style="position: relative;">
+            <input type="password" name="password" class="form-control" required
+                   placeholder="your password" style="padding-right: 44px !important;">
+            <button type="button" onclick="togglePassword(this)"
+                    class="btn-ghost btn-icon"
+                    style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%);"
+                    aria-label="Show password">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-cs2 w-100">
+          <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </button>
+      </form>
+
+      <div style="text-align: center; margin: var(--s-5) 0; position: relative; color: var(--text-3); font-size: 0.82rem;">
+        <hr style="border-color: var(--border); margin: 0;">
+        <span style="background: var(--bg-elev-1); padding: 0 var(--s-3); position: relative; top: -10px;">
+          New here?
+        </span>
+      </div>
+
+      <a href="{{ url_for('auth.register') }}" class="btn btn-cs2-outline w-100">
+        Create an account
+      </a>
+    </div>
+  </div>
+
+  <!-- Right: showcase -->
+  <div class="auth-showcase">
+    <div style="text-align: center; max-width: 400px; position: relative; z-index: 1;">
+      <div style="font-size: 3rem; margin-bottom: var(--s-4);">
+        <i class="bi bi-crosshair2" style="color: var(--accent);"></i>
+      </div>
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--s-3);">
+        The Counter-Strike 2 Marketplace
+      </h2>
+      <p style="color: var(--text-2); margin-bottom: var(--s-5);">
+        Buy outright, rent by the day, or list your own. Real catalog, real rarity tiers,
+        auto-returning rentals.
+      </p>
+
+      <div class="d-flex flex-column gap-3" style="text-align: left;">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width: 40px; height: 40px; background: var(--accent-soft); border-radius: var(--radius-sm); display: grid; place-items: center; color: var(--accent); flex-shrink: 0;">
+            <i class="bi bi-tag-fill"></i>
+          </div>
+          <div>
+            <div style="font-weight: 600; font-size: 0.92rem;">Buy or Sell</div>
+            <div style="color: var(--text-3); font-size: 0.82rem;">Instant transfers, 5% fee</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div style="width: 40px; height: 40px; background: var(--good-soft); border-radius: var(--radius-sm); display: grid; place-items: center; color: var(--good); flex-shrink: 0;">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div>
+            <div style="font-weight: 600; font-size: 0.92rem;">Rent by Day</div>
+            <div style="color: var(--text-3); font-size: 0.82rem;">Auto-returns on due date</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div style="width: 40px; height: 40px; background: rgba(75,158,255,0.1); border-radius: var(--radius-sm); display: grid; place-items: center; color: var(--info); flex-shrink: 0;">
+            <i class="bi bi-graph-up"></i>
+          </div>
+          <div>
+            <div style="font-weight: 600; font-size: 0.92rem;">Price Tracking</div>
+            <div style="color: var(--text-3); font-size: 0.82rem;">30-day history + trends</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
