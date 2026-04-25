@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}{{ skin.weapon_name }} | {{ skin.skin_name }} — CS2 Marketplace{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+{{ m.breadcrumb([
+  {'label': 'Home',   'href': url_for('home')},
+  {'label': 'Browse', 'href': url_for('search')},
+  {'label': skin.weapon_name, 'href': url_for('search', weapon_type=skin.weapon_type)},
+  {'label': skin.skin_name}
+]) }}
+
+<!-- ==================== DETAIL HERO ==================== -->
+<section class="detail-hero observe-fade" data-rarity="{{ skin.rarity }}">
+  <div class="row g-0">
+    <div class="col-lg-6">
+      <div class="detail-img">
+        {% if skin.image_url %}
+          <img src="{{ skin.image_url }}" alt="{{ skin.skin_name }}">
+        {% else %}
+          <i class="bi bi-image" style="font-size: 5rem; color: var(--text-3);"></i>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="detail-meta">
+        <div class="weapon-line" style="color: var(--text-3); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 8px;">
+          <i class="bi bi-tag-fill"></i> {{ skin.weapon_name }}
+        </div>
+        <h1>{{ skin.skin_name }}</h1>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <span class="rarity-pill" data-rarity="{{ skin.rarity }}">{{ skin.rarity }}</span>
+          {% if skin.has_stattrak %}<span class="stattrak-badge">ST™ AVAILABLE</span>{% endif %}
+          {% if skin.has_souvenir %}<span class="chip">Souvenir</span>{% endif %}
+          <span class="chip"><i class="bi bi-tag"></i> {{ skin.weapon_type|capitalize }}</span>
+        </div>
+
+        <!-- Key stats grid -->
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div style="padding: var(--s-3); background: var(--bg-elev-2); border-radius: var(--radius-sm);">
+              <div style="color: var(--text-3); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">Base Price</div>
+              <div style="color: var(--accent); font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums;">
+                ${{ '%.2f' % skin.base_price }}
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="padding: var(--s-3); background: var(--bg-elev-2); border-radius: var(--radius-sm);">
+              <div style="color: var(--text-3); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">Active Listings</div>
+              <div style="color: var(--text-1); font-size: 1.4rem; font-weight: 800;">
+                {{ listings|length }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-2);">
+          <div class="d-flex justify-content-between py-2" style="border-bottom: 1px solid var(--border);">
+            <span style="color: var(--text-3);">Collection</span>
+            <span>{{ skin.collection or '—' }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2">
+            <span style="color: var(--text-3);">Skin ID</span>
+            <span class="mono">#{{ '%04d' % skin.skin_id }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          {% if listings %}
+            <a href="#listings" class="btn btn-cs2">
+              <i class="bi bi-eye"></i> View {{ listings|length }} Listing{{ listings|length != 1 and 's' or '' }}
+            </a>
+          {% endif %}
+          <a href="#price-history" class="btn btn-cs2-outline">
+            <i class="bi bi-graph-up"></i> Price Chart
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PRICE CHART ==================== -->
+<section id="price-history" class="observe-fade delay-1">
+  <div class="section-head">
+    <h2><i class="bi bi-graph-up" style="color: var(--accent);"></i> 30-Day Price Trend</h2>
+    <span class="section-meta">
+      By wear condition · Updated daily
+    </span>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-inner">
+      <canvas id="price-chart"></canvas>
+      <div id="price-chart-loading" style="position: absolute; inset: 0; display: grid; place-items: center;">
+        <div class="skeleton" style="width: 100%; height: 100%; border-radius: var(--radius-sm);"></div>
+      </div>
+      <div id="price-chart-empty" style="position: absolute; inset: 0; display: none; place-items: center; text-align: center; color: var(--text-3);">
+        <div>
+          <i class="bi bi-bar-chart" style="font-size: 2.5rem;"></i>
+          <p class="mt-2 mb-0">No price history available yet for this skin.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ACTIVE LISTINGS ==================== -->
+<section id="listings" class="observe-fade delay-2">
+  <div class="section-head">
+    <h2>Active Listings</h2>
+    <span class="section-meta">{{ listings|length }} available</span>
+  </div>
+  <div class="row">
+    {% for l in listings %}
+      {{ m.skin_card(l, delay=(loop.index0 % 3) + 1) }}
+    {% else %}
+      <div class="col-12">
+        {{ m.empty_state(
+            'bi-tag',
+            'No active listings',
+            'Nobody is selling or renting this skin right now. Check back soon, or browse similar skins below.',
+            'Browse all',
+            url_for('search')
+        ) }}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ==================== RELATED SKINS ==================== -->
+{% if related %}
+<section class="observe-fade mt-5">
+  <div class="section-head">
+    <h2>More {{ skin.weapon_name }} skins</h2>
+    <a href="{{ url_for('search', q=skin.weapon_name) }}" class="btn-ghost">
+      See all <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  <div class="row">
+    {% for r in related %}
+      <div class="col-md-6 col-lg-3 mb-4">
+        <a href="{{ url_for('skin_detail', skin_id=r.skin_id) }}"
+           class="text-decoration-none d-block h-100">
+          <div class="cs2-card h-100" data-rarity="{{ r.rarity }}">
+            <div class="card-img-wrap">
+              {% if r.image_url %}
+                <img src="{{ r.image_url }}" alt="{{ r.skin_name }}" loading="lazy">
+              {% endif %}
+            </div>
+            <div class="card-body">
+              <div class="weapon-line">{{ r.weapon_name }}</div>
+              <div class="skin-name">{{ r.skin_name }}</div>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="rarity-pill" data-rarity="{{ r.rarity }}">{{ r.rarity }}</span>
+                <span class="price">${{ '%.2f' % r.base_price }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='price_chart.js') }}"></script>
+<script>
+  // Hide the skeleton once Chart.js is rendered.
+  (async function() {
+    await renderPriceChart({{ skin.skin_id }});
+    document.getElementById('price-chart-loading').style.display = 'none';
+  })();
+</script>
+{% endblock %}
