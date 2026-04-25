@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Create Account — CS2 Marketplace{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-form-side">
+    <div style="max-width: 380px; width: 100%; margin: 0 auto;">
+      <div style="margin-bottom: var(--s-5);">
+        <span class="eyebrow" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--accent-soft); color: var(--accent); border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: var(--s-3);">
+          <i class="bi bi-rocket-takeoff-fill"></i> Get Started
+        </span>
+        <h1>Create your account</h1>
+        <p style="color: var(--text-2); font-size: 0.95rem;">
+          Start with <strong style="color: var(--accent);">$500</strong> in your wallet.
+          No credit card needed.
+        </p>
+      </div>
+
+      <form method="post" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" required autofocus
+                 placeholder="choose a username">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" required
+                 placeholder="you@example.com">
+        </div>
+        <div class="mb-4">
+          <label class="form-label d-flex justify-content-between">
+            <span>Password</span>
+            <span style="color: var(--text-3); font-size: 0.78rem; font-weight: 400;">
+              at least 6 characters
+            </span>
+          </label>
+          <div class="password-wrap" style="position: relative;">
+            <input type="password" name="password" class="form-control" required minlength="6"
+                   placeholder="minimum 6 characters" style="padding-right: 44px !important;">
+            <button type="button" onclick="togglePassword(this)"
+                    class="btn-ghost btn-icon"
+                    style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%);"
+                    aria-label="Show password">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-cs2 w-100">
+          <i class="bi bi-person-plus-fill"></i> Create Account
+        </button>
+      </form>
+
+      <p style="text-align: center; margin-top: var(--s-5); color: var(--text-3); font-size: 0.88rem;">
+        Already have one? <a href="{{ url_for('auth.login') }}">Sign in instead</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="auth-showcase">
+    <div style="text-align: center; max-width: 400px; position: relative; z-index: 1;">
+      <div style="font-size: 3rem; margin-bottom: var(--s-4);">
+        <i class="bi bi-trophy-fill" style="color: var(--accent);"></i>
+      </div>
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--s-3);">
+        Join {{ '80+' }} traders
+      </h2>
+      <p style="color: var(--text-2); margin-bottom: var(--s-5);">
+        Every new account gets $500 virtual starting balance and full access to the marketplace —
+        buy, sell, rent, and lease.
+      </p>
+
+      <div class="d-flex flex-wrap gap-2 justify-content-center">
+        <span class="rarity-pill" data-rarity="Consumer">Consumer</span>
+        <span class="rarity-pill" data-rarity="Mil-Spec">Mil-Spec</span>
+        <span class="rarity-pill" data-rarity="Restricted">Restricted</span>
+        <span class="rarity-pill" data-rarity="Classified">Classified</span>
+        <span class="rarity-pill" data-rarity="Covert">Covert</span>
+        <span class="rarity-pill" data-rarity="Contraband">Contraband</span>
+      </div>
+      <p style="color: var(--text-3); font-size: 0.8rem; margin-top: var(--s-4);">
+        All 7 rarity tiers from the real CS2 catalog
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
