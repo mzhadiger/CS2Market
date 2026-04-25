@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}{{ listing.weapon_name }} | {{ listing.skin_name }} — Listing{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+{{ m.breadcrumb([
+  {'label': 'Home',   'href': url_for('home')},
+  {'label': 'Browse', 'href': url_for('search')},
+  {'label': listing.weapon_name ~ ' | ' ~ listing.skin_name,
+   'href': url_for('skin_detail', skin_id=listing.skin_id)},
+  {'label': 'Listing #' ~ listing.listing_id}
+]) }}
+
+<div class="row g-4 mx-0">
+  <!-- ==================== LEFT: IMAGE ==================== -->
+  <div class="col-lg-7">
+    <div class="detail-hero observe-fade" data-rarity="{{ listing.rarity }}">
+      <div class="detail-img">
+        {% if listing.image_url %}
+          <img src="{{ listing.image_url }}" alt="{{ listing.skin_name }}">
+        {% endif %}
+        <!-- Listing type badge, top-left -->
+        <div style="position: absolute; top: var(--s-4); left: var(--s-4); z-index: 2;">
+          {% if listing.listing_type == 'sale' %}
+            <span class="chip" style="background: var(--bg-elev-1);">
+              <i class="bi bi-tag-fill" style="color: var(--accent);"></i> For Sale
+            </span>
+          {% else %}
+            <span class="chip" style="background: var(--bg-elev-1);">
+              <i class="bi bi-clock-history" style="color: var(--good);"></i> For Rent
+            </span>
+          {% endif %}
+        </div>
+        <!-- Status pill, top-right -->
+        <div style="position: absolute; top: var(--s-4); right: var(--s-4); z-index: 2;">
+          <span class="status-pill status-{{ listing.status }}">{{ listing.status }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Float analysis (if not knife/gloves — they don't show floats as a bar) -->
+    <div class="cs2-card p-4 mt-3 observe-fade delay-1">
+      <h3 style="font-size: 1rem; margin-bottom: var(--s-3);">
+        <i class="bi bi-droplet-half"></i> Float Analysis
+      </h3>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span style="color: var(--text-2); font-size: 0.9rem;">
+          Wear: <strong style="color: var(--text-1);">{{ listing.wear_category }}</strong>
+        </span>
+        <span class="mono" style="font-size: 0.9rem; color: var(--accent);">
+          {{ '%.6f' % listing.float_value }}
+        </span>
+      </div>
+      <div class="float-bar">
+        <!-- Marker position: float × 100% = percent -->
+        <div class="float-marker" style="left: {{ (listing.float_value * 100)|round(2) }}%;"></div>
+      </div>
+      <div class="float-bar-labels">
+        <span>0.00 FN</span>
+        <span>0.07 MW</span>
+        <span>0.15 FT</span>
+        <span>0.38 WW</span>
+        <span>0.45 BS</span>
+        <span>1.00</span>
+      </div>
+      <p style="color: var(--text-3); font-size: 0.8rem; margin-top: var(--s-3); margin-bottom: 0;">
+        Float values determine a skin's visible wear. Lower floats (Factory New)
+        trade at a premium; higher floats show more damage.
+      </p>
+    </div>
+
+    <!-- Additional details -->
+    <div class="cs2-card p-4 mt-3 observe-fade delay-2">
+      <h3 style="font-size: 1rem; margin-bottom: var(--s-3);">
+        <i class="bi bi-info-circle"></i> Item Details
+      </h3>
+      <div class="row g-3" style="font-size: 0.88rem;">
+        <div class="col-sm-6">
+          <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">Rarity</div>
+          <div><span class="rarity-pill" data-rarity="{{ listing.rarity }}">{{ listing.rarity }}</span></div>
+        </div>
+        <div class="col-sm-6">
+          <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">Weapon Type</div>
+          <div>{{ listing.weapon_type|capitalize }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">Paint Seed</div>
+          <div class="mono">{{ listing.paint_seed }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">StatTrak™</div>
+          <div>{{ 'Yes' if listing.is_stattrak else 'No' }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">Listed</div>
+          <div>{{ listing.created_at.strftime('%b %d, %Y') }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">Listing ID</div>
+          <div class="mono">#{{ '%05d' % listing.listing_id }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== RIGHT: ACTION PANEL ==================== -->
+  <div class="col-lg-5 mt-4 mt-lg-0">
+    <div class="observe-fade">
+      <div class="weapon-line" style="color: var(--text-3); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: var(--s-2);">
+        {{ listing.weapon_name }}
+      </div>
+      <h1 style="margin-bottom: var(--s-3);">{{ listing.skin_name }}</h1>
+
+      <!-- Seller card -->
+      <div class="cs2-card p-3 mb-3" style="display: flex; align-items: center; gap: var(--s-3);">
+        <div class="avatar" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); display: grid; place-items: center; color: var(--text-on-accent); font-weight: 700;">
+          {{ listing.seller_username[0]|upper }}
+        </div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600; color: var(--text-1);">{{ listing.seller_username }}</div>
+          <div style="font-size: 0.78rem; color: var(--text-3);">
+            <i class="bi bi-star-fill" style="color: var(--accent); font-size: 0.72rem;"></i>
+            {{ listing.seller_reputation }} reputation
+          </div>
+        </div>
+        <div>
+          <i class="bi bi-patch-check-fill" style="color: var(--good); font-size: 1.2rem;" title="Verified seller"></i>
+        </div>
+      </div>
+
+      <!-- Action card -->
+      {% if listing.status == 'active' %}
+        {% if listing.listing_type == 'sale' %}
+          <!-- ===== SALE ===== -->
+          <div class="cs2-card p-4" data-rarity="{{ listing.rarity }}">
+            <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">
+              Listing Price
+            </div>
+            <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin: var(--s-1) 0 var(--s-4);">
+              ${{ '%.2f' % listing.sale_price }}
+            </div>
+
+            {% if current_user.is_authenticated %}
+              {% if current_user.id != listing.seller_id %}
+                {% set can_afford = current_user.wallet_balance >= listing.sale_price %}
+                <form method="post"
+                      action="{{ url_for('buy_listing', listing_id=listing.listing_id) }}"
+                      data-confirm="Purchase {{ listing.skin_name }} for ${{ '%.2f' % listing.sale_price }}?">
+                  <button type="submit" class="btn btn-cs2 w-100"
+                          {% if not can_afford %}disabled{% endif %}>
+                    <i class="bi bi-cart-check"></i>
+                    {% if can_afford %}Buy Now{% else %}Insufficient Balance{% endif %}
+                  </button>
+                </form>
+                {% if not can_afford %}
+                  <div class="mt-2 text-center" style="font-size: 0.82rem; color: var(--text-3);">
+                    You need ${{ '%.2f' % (listing.sale_price - current_user.wallet_balance) }} more
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="empty-state" style="padding: var(--s-3);">
+                  <small>This is your listing.</small>
+                </div>
+              {% endif %}
+            {% else %}
+              <a href="{{ url_for('auth.login') }}" class="btn btn-cs2 w-100">
+                <i class="bi bi-box-arrow-in-right"></i> Sign in to Buy
+              </a>
+            {% endif %}
+
+            <div class="mt-3 d-flex justify-content-between" style="font-size: 0.78rem; color: var(--text-3); padding-top: var(--s-3); border-top: 1px solid var(--border);">
+              <span><i class="bi bi-shield-check"></i> Secure transaction</span>
+              <span><i class="bi bi-arrow-repeat"></i> Instant transfer</span>
+            </div>
+          </div>
+
+        {% else %}
+          <!-- ===== RENTAL ===== -->
+          <div class="cs2-card p-4" data-rarity="{{ listing.rarity }}">
+            <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">
+              Rental Rate
+            </div>
+            <div style="margin: var(--s-1) 0 var(--s-4);">
+              <span style="font-size: 2.5rem; font-weight: 800; color: var(--good); font-variant-numeric: tabular-nums; letter-spacing: -0.02em;">
+                ${{ '%.2f' % listing.daily_rental_rate }}
+              </span>
+              <span style="color: var(--text-3); font-size: 1rem;">/day</span>
+            </div>
+
+            <div class="row g-2 mb-3" style="font-size: 0.82rem;">
+              <div class="col-6">
+                <div style="padding: var(--s-2); background: var(--bg-elev-2); border-radius: var(--radius-sm); text-align: center;">
+                  <div style="color: var(--text-3); font-size: 0.7rem;">Deposit</div>
+                  <div style="font-weight: 700;">${{ '%.2f' % listing.rental_deposit }}</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div style="padding: var(--s-2); background: var(--bg-elev-2); border-radius: var(--radius-sm); text-align: center;">
+                  <div style="color: var(--text-3); font-size: 0.7rem;">Max Days</div>
+                  <div style="font-weight: 700;">{{ listing.max_rental_days }}</div>
+                </div>
+              </div>
+            </div>
+
+            {% if current_user.is_authenticated %}
+              {% if current_user.id != listing.seller_id %}
+                <form method="post"
+                      action="{{ url_for('rent_listing', listing_id=listing.listing_id) }}"
+                      id="rent-form">
+                  <!-- Rental duration slider -->
+                  <label class="form-label d-flex justify-content-between">
+                    <span>Rental Duration</span>
+                    <span>
+                      <strong id="days-value" style="color: var(--accent);">7</strong>
+                      <span style="color: var(--text-3);">days</span>
+                    </span>
+                  </label>
+                  <input type="range" name="days" id="days-slider"
+                         class="form-range mb-3"
+                         min="1" max="{{ listing.max_rental_days }}" value="7"
+                         style="accent-color: var(--accent);">
+
+                  <!-- Live cost breakdown -->
+                  <div style="padding: var(--s-3); background: var(--bg-elev-2); border-radius: var(--radius-sm); margin-bottom: var(--s-4);">
+                    <div class="d-flex justify-content-between py-1" style="font-size: 0.88rem;">
+                      <span style="color: var(--text-3);">Daily rate × days</span>
+                      <span id="days-cost" class="mono">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1" style="font-size: 0.88rem;">
+                      <span style="color: var(--text-3);">Refundable deposit</span>
+                      <span class="mono">${{ '%.2f' % listing.rental_deposit }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2" style="border-top: 1px solid var(--border); font-weight: 700;">
+                      <span>Total due now</span>
+                      <span id="total-cost" class="mono" style="color: var(--accent);">$0.00</span>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn btn-cs2 w-100">
+                    <i class="bi bi-clock-history"></i> Start Rental
+                  </button>
+                </form>
+                <div class="mt-2 text-center" style="font-size: 0.78rem; color: var(--text-3);">
+                  <i class="bi bi-info-circle"></i>
+                  Auto-returns to owner when term ends
+                </div>
+              {% else %}
+                <div class="empty-state" style="padding: var(--s-3);">
+                  <small>This is your listing.</small>
+                </div>
+              {% endif %}
+            {% else %}
+              <a href="{{ url_for('auth.login') }}" class="btn btn-cs2 w-100">
+                <i class="bi bi-box-arrow-in-right"></i> Sign in to Rent
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+
+      {% else %}
+        <!-- ===== NOT ACTIVE ===== -->
+        <div class="empty-state">
+          <i class="bi bi-x-circle empty-icon"></i>
+          <h3>Listing unavailable</h3>
+          <p>This listing is no longer active (status: <strong>{{ listing.status }}</strong>).
+             Browse similar listings instead.</p>
+          <a href="{{ url_for('skin_detail', skin_id=listing.skin_id) }}" class="btn btn-cs2 mt-3">
+            See other listings for this skin
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% if listing.status == 'active' and listing.listing_type == 'rental' and current_user.is_authenticated and current_user.id != listing.seller_id %}
+<script>
+  // Live rental cost calculator.
+  const daily = {{ listing.daily_rental_rate }};
+  const deposit = {{ listing.rental_deposit }};
+  const slider = document.getElementById('days-slider');
+  const daysEl = document.getElementById('days-value');
+  const daysCostEl = document.getElementById('days-cost');
+  const totalEl = document.getElementById('total-cost');
+
+  function update() {
+    const d = parseInt(slider.value, 10);
+    const daysCost = daily * d;
+    const total = daysCost + deposit;
+    daysEl.textContent = d;
+    daysCostEl.textContent = '$' + daysCost.toFixed(2);
+    totalEl.textContent = '$' + total.toFixed(2);
+  }
+  slider.addEventListener('input', update);
+  update();
+</script>
+{% endif %}
+{% endblock %}
