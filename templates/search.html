@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Browse — CS2 Marketplace{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+{{ m.breadcrumb([
+  {'label': 'Home', 'href': url_for('home')},
+  {'label': 'Browse'}
+]) }}
+
+<div class="row">
+  <!-- ==================== FILTERS SIDEBAR ==================== -->
+  <aside class="col-lg-3 mb-4">
+
+    <!-- Mobile toggle button -->
+    <button class="filters-mobile-toggle" type="button" onclick="toggleFilters(this)">
+      <span><i class="bi bi-funnel"></i> Filters</span>
+      <i class="bi bi-chevron-down"></i>
+    </button>
+
+    <form method="get" class="filters filters-collapsible">
+      <!-- Search -->
+      <h6>Search</h6>
+      <div class="search-box mb-3">
+        <i class="bi bi-search"></i>
+        <input type="text" name="q" class="form-control"
+               placeholder="AK-47, Redline…" value="{{ args.q or '' }}">
+      </div>
+
+      <!-- Listing Type -->
+      <h6>Listing Type</h6>
+      <select name="listing_type" class="form-select mb-3">
+        <option value="">Sale + Rental</option>
+        <option value="sale"   {% if args.listing_type=='sale'   %}selected{% endif %}>Sale Only</option>
+        <option value="rental" {% if args.listing_type=='rental' %}selected{% endif %}>Rental Only</option>
+      </select>
+
+      <!-- Rarity -->
+      <h6>Rarity</h6>
+      <select name="rarity" class="form-select mb-3">
+        <option value="">Any Rarity</option>
+        {% for r in all_rarities %}
+          <option value="{{ r }}" {% if args.rarity==r %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Weapon Type -->
+      <h6>Weapon Type</h6>
+      <select name="weapon_type" class="form-select mb-3">
+        <option value="">Any Type</option>
+        {% for t in all_weapon_types %}
+          <option value="{{ t }}" {% if args.weapon_type==t %}selected{% endif %}>
+            {{ t|capitalize }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <!-- Price Range -->
+      <h6>Price Range (USD)</h6>
+      <div class="d-flex gap-2 mb-3">
+        <input name="min_price" type="number" step="0.01" class="form-control"
+               placeholder="min" value="{{ args.min_price or '' }}">
+        <span style="color: var(--text-3); align-self: center;">–</span>
+        <input name="max_price" type="number" step="0.01" class="form-control"
+               placeholder="max" value="{{ args.max_price or '' }}">
+      </div>
+
+      <!-- Sort -->
+      <h6>Sort By</h6>
+      <select name="sort" class="form-select mb-4">
+        <option value="newest"     {% if args.sort=='newest'     %}selected{% endif %}>Newest First</option>
+        <option value="price_asc"  {% if args.sort=='price_asc'  %}selected{% endif %}>Price: Low to High</option>
+        <option value="price_desc" {% if args.sort=='price_desc' %}selected{% endif %}>Price: High to Low</option>
+        <option value="rarity"     {% if args.sort=='rarity'     %}selected{% endif %}>By Rarity</option>
+      </select>
+
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-cs2">
+          <i class="bi bi-funnel-fill"></i> Apply Filters
+        </button>
+        <a href="{{ url_for('search') }}" class="btn btn-cs2-outline">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </a>
+      </div>
+    </form>
+  </aside>
+
+  <!-- ==================== RESULTS ==================== -->
+  <section class="col-lg-9">
+    <div class="section-head">
+      <h2>Browse Marketplace</h2>
+      <span class="section-meta">
+        <strong style="color: var(--text-1);">{{ listings|length }}</strong>
+        result{{ listings|length != 1 and 's' or '' }}
+      </span>
+    </div>
+
+    <!-- Active filter chips -->
+    {{ m.active_filter_chips(args) }}
+
+    <!-- Grid -->
+    <div class="row">
+      {% for l in listings %}
+        {{ m.skin_card(l, delay=(loop.index0 % 3) + 1) }}
+      {% else %}
+        <div class="col-12">
+          {{ m.empty_state(
+              'bi-search',
+              'No matches found',
+              'Try removing some filters, or widen your price range. The catalog has skins from Consumer Grade all the way to Contraband.',
+              'Reset Filters',
+              url_for('search')
+          ) }}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+{% endblock %}
