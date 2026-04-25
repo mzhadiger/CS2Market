@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}My Rentals — CS2 Marketplace{% endblock %}
+
+{% block content %}
+
+{{ m.breadcrumb([
+  {'label': 'Home', 'href': url_for('home')},
+  {'label': 'Rentals'}
+]) }}
+
+<div class="section-head">
+  <div>
+    <h1 style="margin-bottom: var(--s-1);">
+      <i class="bi bi-clock-history"></i> My Rentals
+    </h1>
+    <div style="color: var(--text-3); font-size: 0.9rem;">
+      Skins you're renting + skins you're leasing to others
+    </div>
+  </div>
+</div>
+
+<!-- ==================== EARNINGS KPIs ==================== -->
+{% if earnings and earnings.total_rentals > 0 %}
+<section class="stat-strip observe-fade" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="stat-card">
+    <span class="stat-icon"><i class="bi bi-box-arrow-down"></i></span>
+    <span class="stat-label">Lifetime Earnings</span>
+    <span class="stat-value" data-count-to="{{ earnings.lifetime_earnings|int }}" data-prefix="$">
+      ${{ '{:,.0f}'.format(earnings.lifetime_earnings) }}
+    </span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-icon"><i class="bi bi-clock-history"></i></span>
+    <span class="stat-label">Total Rentals Fulfilled</span>
+    <span class="stat-value" data-count-to="{{ earnings.total_rentals }}">{{ earnings.total_rentals }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-icon"><i class="bi bi-arrow-repeat"></i></span>
+    <span class="stat-label">Currently Renting</span>
+    <span class="stat-value" data-count-to="{{ renting|length }}">{{ renting|length }}</span>
+  </div>
+</section>
+{% endif %}
+
+<!-- ==================== TABS ==================== -->
+<ul class="nav nav-tabs mb-4" id="rentalTabs" style="border-bottom: 1px solid var(--border); gap: var(--s-3);">
+  <li class="nav-item">
+    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-renting"
+            style="background: transparent; border: none; color: var(--text-2); padding: var(--s-3) var(--s-4); border-bottom: 2px solid transparent;">
+      <i class="bi bi-box-arrow-in-down"></i> I'm Renting
+      <span class="chip" style="margin-left: 6px; background: var(--bg-elev-2); padding: 2px 8px; font-size: 0.7rem;">
+        {{ renting|length }}
+      </span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-leasing"
+            style="background: transparent; border: none; color: var(--text-2); padding: var(--s-3) var(--s-4); border-bottom: 2px solid transparent;">
+      <i class="bi bi-box-arrow-up"></i> Leasing Out
+      <span class="chip" style="margin-left: 6px; background: var(--bg-elev-2); padding: 2px 8px; font-size: 0.7rem;">
+        {{ leasing_out|length }}
+      </span>
+    </button>
+  </li>
+</ul>
+
+<style>
+  /* Local tab styling overrides Bootstrap defaults */
+  .nav-tabs .nav-link.active { color: var(--accent) !important; border-bottom-color: var(--accent) !important; background: transparent !important; }
+  .nav-tabs .nav-link:hover  { color: var(--text-1) !important; }
+</style>
+
+<div class="tab-content">
+  <!-- ==================== RENTING TAB ==================== -->
+  <div class="tab-pane fade show active" id="tab-renting">
+    {% if renting %}
+      <div class="cs2-card" style="overflow: hidden;">
+        <div class="table-responsive">
+          <table class="table cs2-table mb-0">
+            <thead>
+              <tr>
+                <th>Skin</th>
+                <th>Owner</th>
+                <th>Period</th>
+                <th>Time Left</th>
+                <th>Paid</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in renting %}
+              <tr>
+                <td data-label="Skin" style="font-weight: 600;">
+                  <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase;">{{ r.weapon_name }}</div>
+                  <div>{{ r.skin_name }}</div>
+                </td>
+                <td data-label="Owner" style="color: var(--text-2);">{{ r.owner }}</td>
+                <td data-label="Period" style="font-size: 0.82rem; color: var(--text-2);">
+                  {{ r.start_date }} <br class="d-none d-md-inline"><span style="color: var(--text-3);">→</span> {{ r.end_date }}
+                </td>
+                <td data-label="Time Left">
+                  {% if r.days_remaining < 0 %}
+                    <span style="color: var(--bad); font-weight: 600;">
+                      <i class="bi bi-exclamation-triangle-fill"></i>
+                      {{ r.days_remaining * -1 }}d overdue
+                    </span>
+                  {% elif r.days_remaining <= 1 %}
+                    <span style="color: var(--warn); font-weight: 600;">
+                      {{ r.days_remaining }}d left
+                    </span>
+                  {% else %}
+                    <span>{{ r.days_remaining }}d left</span>
+                  {% endif %}
+                </td>
+                <td data-label="Paid" class="price">${{ '%.2f' % r.total_cost }}</td>
+                <td data-label="Status">
+                  <span class="status-pill status-{{ r.effective_status }}">{{ r.effective_status }}</span>
+                </td>
+                <td data-label="">
+                  {% if r.effective_status in ('active', 'overdue') %}
+                    <form method="post"
+                          action="{{ url_for('return_rental', rental_id=r.rental_id) }}"
+                          data-confirm="Return early? You'll get your ${{ '%.2f' % r.deposit_paid }} deposit back.">
+                      <button type="submit" class="btn btn-cs2 btn-sm">
+                        <i class="bi bi-arrow-return-left"></i> Return
+                      </button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      {{ m.empty_state(
+          'bi-box-arrow-in-down',
+          'You aren\'t renting anything',
+          'Browse rental listings to try out expensive skins without buying them outright.',
+          'Browse Rentals',
+          url_for('search', listing_type='rental')
+      ) }}
+    {% endif %}
+  </div>
+
+  <!-- ==================== LEASING TAB ==================== -->
+  <div class="tab-pane fade" id="tab-leasing">
+    {% if leasing_out %}
+      <div class="cs2-card" style="overflow: hidden;">
+        <div class="table-responsive">
+          <table class="table cs2-table mb-0">
+            <thead>
+              <tr>
+                <th>Skin</th>
+                <th>Renter</th>
+                <th>Period</th>
+                <th>Time Left</th>
+                <th>Earnings</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in leasing_out %}
+              <tr>
+                <td data-label="Skin" style="font-weight: 600;">
+                  <div style="color: var(--text-3); font-size: 0.72rem; text-transform: uppercase;">{{ r.weapon_name }}</div>
+                  <div>{{ r.skin_name }}</div>
+                </td>
+                <td data-label="Renter" style="color: var(--text-2);">{{ r.renter }}</td>
+                <td data-label="Period" style="font-size: 0.82rem; color: var(--text-2);">
+                  {{ r.start_date }} <br class="d-none d-md-inline"><span style="color: var(--text-3);">→</span> {{ r.end_date }}
+                </td>
+                <td data-label="Time Left">
+                  {% if r.days_remaining < 0 %}
+                    <span style="color: var(--bad); font-weight: 600;">{{ r.days_remaining * -1 }}d overdue</span>
+                  {% else %}
+                    {{ r.days_remaining }}d left
+                  {% endif %}
+                </td>
+                <td data-label="Earnings" class="price">${{ '%.2f' % r.total_cost }}</td>
+                <td data-label="Status">
+                  <span class="status-pill status-{{ r.effective_status }}">{{ r.effective_status }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      {{ m.empty_state(
+          'bi-box-arrow-up',
+          'No one is renting your skins yet',
+          'List a skin as a rental to earn passive income. Others pay daily; the skin auto-returns when the term ends.',
+          'List a Skin',
+          url_for('my_inventory')
+      ) }}
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
