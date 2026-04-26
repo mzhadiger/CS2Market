@@ -1,7 +1,6 @@
 -- =====================================================================
 -- CS2 SKIN MARKETPLACE — Database Schema
 -- CSCI 300 Database Management, Spring 2026
--- Requires: MySQL 8.0+ (CHECK constraints, generated columns, EVENTs)
 -- =====================================================================
 
 -- Clean slate so re-runs work without manual drops
