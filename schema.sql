@@ -3,7 +3,6 @@
 -- CSCI 300 Database Management, Spring 2026
 -- =====================================================================
 
--- Clean slate so re-runs work without manual drops
 DROP DATABASE IF EXISTS cs2_marketplace;
 CREATE DATABASE cs2_marketplace
     CHARACTER SET utf8mb4
@@ -42,7 +41,6 @@ CREATE TABLE Weapons (
 
 -- ---------------------------------------------------------------------
 -- 3) Skins — weapon finishes (AK-47 Redline, AWP Dragon Lore...).
---    This is the main catalog; Phase 2 seeds it from the CSGO-API.
 -- ---------------------------------------------------------------------
 CREATE TABLE Skins (
     skin_id         INT AUTO_INCREMENT PRIMARY KEY,
