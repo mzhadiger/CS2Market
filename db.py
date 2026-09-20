@@ -1,9 +1,6 @@
 """
 db.py — Thin MySQL wrapper.
 
-We intentionally skip ORMs (SQLAlchemy, Peewee). The project is graded on
-SQL quality, so every statement is hand-written and findable by the grader.
-
 Three things to know:
   1. get_db() returns a pooled connection scoped to the Flask request.
   2. close_db() is wired into Flask's teardown so connections return to
